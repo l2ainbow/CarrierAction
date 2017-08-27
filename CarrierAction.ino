@@ -1,11 +1,11 @@
 #include <SoftwareSerial.h>
 
-#define PIN_IN1_R  4
-#define PIN_IN2_R  5
-#define PIN_VREF_R 6 // PWM
-#define PIN_IN1_L  7
-#define PIN_IN2_L  8
-#define PIN_VREF_L 9 // PWM
+#define PIN_IN1_R  5
+#define PIN_IN2_R  6
+//#define PIN_VREF_R 6 // PWM
+#define PIN_IN1_L  9
+#define PIN_IN2_L  10
+//#define PIN_VREF_L 9 // PWM
 
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
@@ -152,33 +152,43 @@ void rotateMotor(int pwm, Motor m){
   Serial.println(isBreak);
   
   if (m == Right){
-    analogWrite(PIN_VREF_R, val);
+    //analogWrite(PIN_VREF_R, val);
     if (isBreak){
+      //analogWrite(PIN_IN1_R, val);
+      //analogWrite(PIN_IN2_R, val);
       digitalWrite(PIN_IN1_R, HIGH);
       digitalWrite(PIN_IN2_R, HIGH);      
     }
     else if (isAhead){
-      digitalWrite(PIN_IN1_R, HIGH);
-      digitalWrite(PIN_IN2_R, LOW);      
+      analogWrite(PIN_IN1_R, 0);
+      analogWrite(PIN_IN2_R, val);
+      //digitalWrite(PIN_IN1_R, HIGH);
+      //digitalWrite(PIN_IN2_R, LOW);
     }
     else{
-      digitalWrite(PIN_IN1_R, LOW);
-      digitalWrite(PIN_IN2_R, HIGH);      
+      analogWrite(PIN_IN1_R, val);
+      analogWrite(PIN_IN2_R, 0);
+      //digitalWrite(PIN_IN1_R, LOW);
+      //digitalWrite(PIN_IN2_R, HIGH);
     }
   }
   else{
-    analogWrite(PIN_VREF_L, val);
+    //analogWrite(PIN_VREF_L, val);
     if (isBreak){
       digitalWrite(PIN_IN1_L, HIGH);
       digitalWrite(PIN_IN2_L, HIGH);      
     }
     else if (isAhead){
-      digitalWrite(PIN_IN1_L, HIGH);
-      digitalWrite(PIN_IN2_L, LOW);      
+      analogWrite(PIN_IN1_L, 0);
+      analogWrite(PIN_IN2_L, val);
+      //digitalWrite(PIN_IN1_L, HIGH);
+      //digitalWrite(PIN_IN2_L, LOW);      
     }
     else{
-      digitalWrite(PIN_IN1_L, LOW);
-      digitalWrite(PIN_IN2_L, HIGH);      
+      analogWrite(PIN_IN1_L, val);
+      analogWrite(PIN_IN2_L, 0);
+      //digitalWrite(PIN_IN1_L, LOW);
+      //digitalWrite(PIN_IN2_L, HIGH);      
     }
   }
   delay(100);

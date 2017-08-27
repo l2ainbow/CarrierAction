@@ -1,5 +1,8 @@
 #include <SoftwareSerial.h>
 
+const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
+const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
+
 SoftwareSerial rn4020(2, 3);
 
 struct commandTable {
@@ -15,8 +18,13 @@ String readStr; // RN4020から受信した文字列
 
 String recvBuffer; // 受信用のバッファ
 
+int leftMotorPWM; // 左モータのPWM(-100~100)
+int rightMotorPWM; // 右モータのPWM(-100~100)
+
 void setup() {
   recvBuffer = "";
+  leftMotorPWM = 0;
+  rightMotorPWM = 0;
   
   Serial.begin(57600);
   delay(100);
@@ -66,7 +74,7 @@ void analyseBuffer(){
   String line = "";
   while ((eol = recvBuffer.indexOf("\r\n")) >= 0){
     line = recvBuffer.substring(0, eol);
-    Serial.println(line+".");
+    analyseLine(line);
 
     if(eol == recvBuffer.length()){
       recvBuffer = "";
@@ -74,6 +82,32 @@ void analyseBuffer(){
     }
     recvBuffer = recvBuffer.substring(eol + 2);
   }
+}
+
+// 1行単位での解析
+void analyseLine(String line){
+  Serial.println(line);
+  if(line.startsWith("WV,")){
+    String residual = line.substring(line.indexOf(',') + 1);
+    if (residual.startsWith(LEFT_MOTOR_HANDLE)){
+      residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
+      
+      int value = convertStr2Int(residual);
+      Serial.println(value);
+    }
+  }
+}
+
+// 文字列から整数型の変換
+int convertStr2Int(String str){
+  int value = 0;
+  for(int i = 0; i < str.length(); i+=2){
+    if (str.charAt(i) == '3'){
+      int num = str.charAt(i+1) - '0';
+      value = value * 10 + num;
+    }
+  }
+  return value;
 }
 
 // RN4020への文字列送信

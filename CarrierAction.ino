@@ -1,5 +1,12 @@
 #include <SoftwareSerial.h>
 
+#define PIN_IN1_R  4
+#define PIN_IN2_R  5
+#define PIN_VREF_R 6 // PWM
+#define PIN_IN1_L  7
+#define PIN_IN2_L  8
+#define PIN_VREF_L 9 // PWM
+
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
 
@@ -8,6 +15,11 @@ SoftwareSerial rn4020(2, 3);
 struct commandTable {
   char comm[50];
   int len;
+};
+
+enum Motor {
+  Right,
+  Left,
 };
 
 struct commandTable reboot = {"R,1",3};
@@ -22,6 +34,11 @@ int leftMotorPWM; // 左モータのPWM(-100~100)
 int rightMotorPWM; // 右モータのPWM(-100~100)
 
 void setup() {
+  pinMode(PIN_IN1_R,OUTPUT); 
+  pinMode(PIN_IN2_R,OUTPUT);
+  pinMode(PIN_IN1_L,OUTPUT); 
+  pinMode(PIN_IN2_L,OUTPUT); 
+  
   recvBuffer = "";
   leftMotorPWM = 0;
   rightMotorPWM = 0;
@@ -91,9 +108,15 @@ void analyseLine(String line){
     String residual = line.substring(line.indexOf(',') + 1);
     if (residual.startsWith(LEFT_MOTOR_HANDLE)){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
-      
       int value = convertStr2Int(residual);
       Serial.println(value);
+      rotateMotor(value, Left);
+    }
+    else if (residual.startsWith(RIGHT_MOTOR_HANDLE)){
+      residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
+      int value = convertStr2Int(residual);
+      Serial.println(value);
+      rotateMotor(value, Right);
     }
   }
 }
@@ -101,13 +124,64 @@ void analyseLine(String line){
 // 文字列から整数型の変換
 int convertStr2Int(String str){
   int value = 0;
+  int sign = 1;
+  if (str.substring(0,2).compareTo("2D") == 0)
+    sign = -1;
+    
   for(int i = 0; i < str.length(); i+=2){
     if (str.charAt(i) == '3'){
       int num = str.charAt(i+1) - '0';
       value = value * 10 + num;
     }
   }
+  value = sign * value;
   return value;
+}
+
+// モータの回転
+void rotateMotor(int pwm, Motor m){
+  boolean isAhead = (pwm > 0);
+  boolean isBreak = (pwm == 0);
+  
+  int val = (int)(abs(pwm)/100.0*255);
+  
+  Serial.print(val);
+  Serial.print(",");
+  Serial.print(isAhead);
+  Serial.print(",");
+  Serial.println(isBreak);
+  /*
+  if (m == Motor.Right){
+    analogWrite(PIN_VREF_R, val);
+    if (isBreak){
+      digitalWrite(PIN_IN1_R, HIGH);
+      digitalWrite(PIN_IN2_R, HIGH);      
+    }
+    else if (isAhead){
+      digitalWrite(PIN_IN1_R, HIGH);
+      digitalWrite(PIN_IN2_R, LOW);      
+    }
+    else{
+      digitalWrite(PIN_IN1_R, LOW);
+      digitalWrite(PIN_IN2_R, HIGH);      
+    }
+  }
+  else{
+    analogWrite(PIN_VREF_L, val);
+    if (isBreak){
+      digitalWrite(PIN_IN1_L, HIGH);
+      digitalWrite(PIN_IN2_L, HIGH);      
+    }
+    else if (isAhead){
+      digitalWrite(PIN_IN1_L, HIGH);
+      digitalWrite(PIN_IN2_L, LOW);      
+    }
+    else{
+      digitalWrite(PIN_IN1_L, LOW);
+      digitalWrite(PIN_IN2_L, HIGH);      
+    }
+  }
+  */
 }
 
 // RN4020への文字列送信

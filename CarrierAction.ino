@@ -57,6 +57,8 @@ void setup() {
   
   rn4020.begin(9600);
   delay(100);
+  sendRN4020("SHW,"+LEFT_MOTOR_HANDLE+",30",11);
+  sendRN4020("SHW,"+RIGHT_MOTOR_HANDLE+",30",11);
 
   Serial.setTimeout(10);
 }
@@ -152,24 +154,17 @@ void rotateMotor(int pwm, Motor m){
   Serial.println(isBreak);
   
   if (m == Right){
-    //analogWrite(PIN_VREF_R, val);
     if (isBreak){
-      //analogWrite(PIN_IN1_R, val);
-      //analogWrite(PIN_IN2_R, val);
       digitalWrite(PIN_IN1_R, HIGH);
       digitalWrite(PIN_IN2_R, HIGH);      
     }
     else if (isAhead){
       analogWrite(PIN_IN1_R, 0);
       analogWrite(PIN_IN2_R, val);
-      //digitalWrite(PIN_IN1_R, HIGH);
-      //digitalWrite(PIN_IN2_R, LOW);
     }
     else{
       analogWrite(PIN_IN1_R, val);
       analogWrite(PIN_IN2_R, 0);
-      //digitalWrite(PIN_IN1_R, LOW);
-      //digitalWrite(PIN_IN2_R, HIGH);
     }
   }
   else{
@@ -181,17 +176,12 @@ void rotateMotor(int pwm, Motor m){
     else if (isAhead){
       analogWrite(PIN_IN1_L, 0);
       analogWrite(PIN_IN2_L, val);
-      //digitalWrite(PIN_IN1_L, HIGH);
-      //digitalWrite(PIN_IN2_L, LOW);      
     }
     else{
       analogWrite(PIN_IN1_L, val);
       analogWrite(PIN_IN2_L, 0);
-      //digitalWrite(PIN_IN1_L, LOW);
-      //digitalWrite(PIN_IN2_L, HIGH);      
     }
   }
-  delay(100);
 }
 
 // RN4020への文字列送信

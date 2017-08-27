@@ -13,8 +13,11 @@ struct commandTable baudRate = {"SB,1",4}; //baud rate 9600
 String inputStr; // シリアルモニタからの入力文字列
 String readStr; // RN4020から受信した文字列
 
+String recvBuffer; // 受信用のバッファ
+
 void setup() {
-  // put your setup code here, to run once:
+  recvBuffer = "";
+  
   Serial.begin(57600);
   delay(100);
   
@@ -50,12 +53,27 @@ void loop() {
   }
 
   // 受信データの読込
-  readStr = "";
   while(rn4020.available()){
-    readStr += (char)rn4020.read();
+    recvBuffer += (char)rn4020.read();
   }
-  if (readStr != "")
-    Serial.print(readStr+".");
+
+  analyseBuffer();
+}
+
+// 受信データの解析
+void analyseBuffer(){
+  int eol = -1;
+  String line = "";
+  while ((eol = recvBuffer.indexOf("\r\n")) >= 0){
+    line = recvBuffer.substring(0, eol);
+    Serial.println(line+".");
+
+    if(eol == recvBuffer.length()){
+      recvBuffer = "";
+      break;
+    }
+    recvBuffer = recvBuffer.substring(eol + 2);
+  }
 }
 
 // RN4020への文字列送信

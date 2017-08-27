@@ -150,8 +150,8 @@ void rotateMotor(int pwm, Motor m){
   Serial.print(isAhead);
   Serial.print(",");
   Serial.println(isBreak);
-  /*
-  if (m == Motor.Right){
+  
+  if (m == Right){
     analogWrite(PIN_VREF_R, val);
     if (isBreak){
       digitalWrite(PIN_IN1_R, HIGH);
@@ -181,7 +181,7 @@ void rotateMotor(int pwm, Motor m){
       digitalWrite(PIN_IN2_L, HIGH);      
     }
   }
-  */
+  delay(100);
 }
 
 // RN4020への文字列送信

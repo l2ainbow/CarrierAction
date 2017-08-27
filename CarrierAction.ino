@@ -10,8 +10,8 @@ struct commandTable {
 struct commandTable reboot = {"R,1",3};
 struct commandTable baudRate = {"SB,1",4}; //baud rate 9600
 
-char recvChar;
-String recvStr;
+String inputStr; // シリアルモニタからの入力文字列
+String readStr; // RN4020から受信した文字列
 
 void setup() {
   // put your setup code here, to run once:
@@ -35,25 +35,30 @@ void setup() {
 
 void loop() {
   // シリアルモニタから文字列入力
-  recvStr = "";
+  inputStr = "";
+  char inputChar;
   while(Serial.available()){
-    recvChar = Serial.read();
-    recvStr += recvChar;
+    inputChar = Serial.read();
+    inputStr += inputChar;
     delay(10);
   }
 
   // 文字列の送信
-  if (recvStr.compareTo("") != 0){
-    Serial.print(recvStr);
-    sendRN4020(recvStr, recvStr.length() - 2);
+  if (inputStr.compareTo("") != 0){
+    Serial.print(inputStr);
+    sendRN4020(inputStr, inputStr.length() - 2);
   }
 
   // 受信データの読込
+  readStr = "";
   while(rn4020.available()){
-    Serial.print((char)rn4020.read());
+    readStr += (char)rn4020.read();
   }
+  if (readStr != "")
+    Serial.print(readStr+".");
 }
 
+// RN4020への文字列送信
 void sendRN4020(String s,int l){
   for(int i=0;i<l;i++){
     rn4020.write(s.charAt(i));

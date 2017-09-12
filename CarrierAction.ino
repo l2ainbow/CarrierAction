@@ -9,6 +9,7 @@
 
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
+const String MOTOR_HANDLE = "002A"; // モータのハンドル名
 
 SoftwareSerial rn4020(2, 3);
 
@@ -59,6 +60,7 @@ void setup() {
   delay(100);
   sendRN4020("SHW,"+LEFT_MOTOR_HANDLE+",30",11);
   sendRN4020("SHW,"+RIGHT_MOTOR_HANDLE+",30",11);
+  sendRN4020("SHW,"+MOTOR_HANDLE+",0000",13);
 
   Serial.setTimeout(10);
 }
@@ -120,6 +122,15 @@ void analyseLine(String line){
       Serial.println(value);
       rotateMotor(value, Right);
     }
+    else if (residual.startsWith(MOTOR_HANDLE)){
+      residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
+      char left = convertStr2Char(residual.substring(0,2));
+      char right = convertStr2Char(residual.substring(2,4));
+      Serial.println(left,DEC);
+      Serial.println(right,DEC);
+      rotateMotor((int)left,Left);
+      rotateMotor((int)right,Right);
+    }
   }
 }
 
@@ -138,6 +149,14 @@ int convertStr2Int(String str){
   }
   value = sign * value;
   return value;
+}
+
+// 文字列からChar型への変換
+char convertStr2Char(String str){
+  int value = 0;
+  value = str.charAt(0) * 16 + str.charAt(1);
+  value -= 128;
+  return (char)value;
 }
 
 // モータの回転

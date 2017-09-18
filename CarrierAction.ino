@@ -32,6 +32,7 @@ String inputStr; // シリアルモニタからの入力文字列
 String readStr; // RN4020から受信した文字列
 
 String recvBuffer; // 受信用のバッファ
+bool isConnected;
 
 void setup() {
   // カラーLEDの初期化
@@ -46,6 +47,7 @@ void setup() {
 
   // グローバル変数の初期化
   recvBuffer = "";
+  isConnected = false;
 
   // シリアル通信の初期化
   Serial.begin(57600);
@@ -94,7 +96,13 @@ void loop() {
     recvBuffer += (char)rn4020.read();
   }
 
+  // 受信データの解析
   analyseBuffer();
+
+  // 接続状態の確認
+  if (!isConnected){
+    shineColorLED(255,0,0,255);
+  }
 }
 
 // 受信データの解析
@@ -151,6 +159,13 @@ void analyseLine(String line){
       Serial.println(brgt,DEC);
       shineColorLED(r,g,b,brgt);
     }
+  }
+  else if (line.startsWith("Connected")){
+    isConnected = true;
+    shineColorLED(0,0,0,0);
+  }
+  else if (line.startsWith("Connection End")){
+    isConnected = false;
   }
 }
 

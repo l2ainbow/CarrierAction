@@ -9,8 +9,8 @@ const int PIN_RGBLED = 16; // カラーLEDのPIN番号
 const int NUM_RGBLED = 2; // カラーLEDの数
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
-const String RGBLED_HANDLE = "001F"; // 左モータのハンドル名
-const String MOTOR_HANDLE = "0000"; // モータのハンドル名
+const String RGBLED_HANDLE = "001E"; // 左モータのハンドル名
+const String MOTOR_HANDLE = "0021"; // モータのハンドル名
 
 SoftwareSerial rn4020(2, 3);
 Adafruit_NeoPixel RGBLED = Adafruit_NeoPixel(NUM_RGBLED, PIN_RGBLED, NEO_RGB + NEO_KHZ800);
@@ -61,7 +61,7 @@ void setup() {
   sendRN4020(reboot.comm, reboot.len);
   delay(2000);
   */
-
+  
   // RN4020の初期化
   rn4020.begin(9600);
   delay(100);
@@ -76,8 +76,10 @@ void setup() {
 void loop() {
   // シリアルモニタから文字列入力
   inputStr = "";
+  char inputChar;
   while(Serial.available()){
-    inputStr += Serial.read();
+    inputChar = Serial.read();
+    inputStr += inputChar;
     delay(10);
   }
 
@@ -152,6 +154,7 @@ void analyseLine(String line){
   }
 }
 
+// カラーLEDを光らせる
 void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness){
   RGBLED.setBrightness(brightness);
   for (int i = 0; i < NUM_RGBLED; i++){

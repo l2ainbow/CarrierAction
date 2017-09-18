@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <Adafruit_NeoPixel.h>
 
 #define PIN_IN1_R  5
 #define PIN_IN2_R  6
@@ -6,12 +7,16 @@
 #define PIN_IN1_L  9
 #define PIN_IN2_L  10
 //#define PIN_VREF_L 9 // PWM
+#define PIN_RGBLED 16
+#define NUM_RGBLED 2
 
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
-const String MOTOR_HANDLE = "002A"; // モータのハンドル名
+const String LED_RGB_HANDLE = "0020"; // 左モータのハンドル名
+const String MOTOR_HANDLE = "0022"; // モータのハンドル名
 
 SoftwareSerial rn4020(2, 3);
+Adafruit_NeoPixel RGBLED = Adafruit_NeoPixel(NUM_RGBLED, PIN_RGBLED, NEO_RGB + NEO_KHZ800);
 
 struct commandTable {
   char comm[50];
@@ -35,11 +40,18 @@ int leftMotorPWM; // 左モータのPWM(-100~100)
 int rightMotorPWM; // 右モータのPWM(-100~100)
 
 void setup() {
+  // カラーLEDの初期化
+  RGBLED.begin();
+  RGBLED.setBrightness(0);
+  RGBLED.setPixelColor(0, 0, 0, 0);
+  RGBLED.setPixelColor(1, 0, 0, 0);
+  RGBLED.show();
+  
   pinMode(PIN_IN1_R,OUTPUT); 
   pinMode(PIN_IN2_R,OUTPUT);
   pinMode(PIN_IN1_L,OUTPUT); 
   pinMode(PIN_IN2_L,OUTPUT); 
-  
+
   recvBuffer = "";
   leftMotorPWM = 0;
   rightMotorPWM = 0;
@@ -131,7 +143,23 @@ void analyseLine(String line){
       rotateMotor((int)left,Left);
       rotateMotor((int)right,Right);
     }
+    else if (residual.startsWith(LED_RGB_HANDLE)){
+      residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
+      unsigned char r = convertStr2Char(residual.substring(0,2));
+      unsigned char g = convertStr2Char(residual.substring(2,4));
+      unsigned char b = convertStr2Char(residual.substring(4,6));
+      unsigned char brgt = convertStr2Char(residual.substring(6,8));
+      Serial.println(r,DEC);
+      Serial.println(g,DEC);
+      Serial.println(b,DEC);
+      Serial.println(brgt,DEC);
+      shineColorLED(r,g,b,brgt);
+    }
   }
+}
+
+void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness){
+   
 }
 
 // 文字列から整数型の変換
@@ -170,8 +198,10 @@ void rotateMotor(int pwm, Motor m){
   Serial.print(",");
   Serial.print(isAhead);
   Serial.print(",");
-  Serial.println(isBreak);
-  
+  Serial.print(isBreak);
+  Serial.print(",");
+  Serial.println(m);
+
   if (m == Right){
     if (isBreak){
       digitalWrite(PIN_IN1_R, HIGH);
@@ -187,7 +217,6 @@ void rotateMotor(int pwm, Motor m){
     }
   }
   else{
-    //analogWrite(PIN_VREF_L, val);
     if (isBreak){
       digitalWrite(PIN_IN1_L, HIGH);
       digitalWrite(PIN_IN2_L, HIGH);      

@@ -12,8 +12,8 @@
 
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
-const String LED_RGB_HANDLE = "0020"; // 左モータのハンドル名
-const String MOTOR_HANDLE = "0022"; // モータのハンドル名
+const String RGBLED_HANDLE = "001F"; // 左モータのハンドル名
+const String MOTOR_HANDLE = "0000"; // モータのハンドル名
 
 SoftwareSerial rn4020(2, 3);
 Adafruit_NeoPixel RGBLED = Adafruit_NeoPixel(NUM_RGBLED, PIN_RGBLED, NEO_RGB + NEO_KHZ800);
@@ -69,6 +69,7 @@ void setup() {
   delay(100);
   sendRN4020("SHW,"+LEFT_MOTOR_HANDLE+",30",11);
   sendRN4020("SHW,"+RIGHT_MOTOR_HANDLE+",30",11);
+  sendRN4020("SHW,"+RGBLED_HANDLE+",00000000",17);
   sendRN4020("SHW,"+MOTOR_HANDLE+",0000",13);
 
   Serial.setTimeout(10);
@@ -140,7 +141,7 @@ void analyseLine(String line){
       rotateMotor((int)left,Left);
       rotateMotor((int)right,Right);
     }
-    else if (residual.startsWith(LED_RGB_HANDLE)){
+    else if (residual.startsWith(RGBLED_HANDLE)){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
       unsigned char r = convertStr2Char(residual.substring(0,2));
       unsigned char g = convertStr2Char(residual.substring(2,4));

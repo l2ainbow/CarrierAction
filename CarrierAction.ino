@@ -42,10 +42,7 @@ int rightMotorPWM; // 右モータのPWM(-100~100)
 void setup() {
   // カラーLEDの初期化
   RGBLED.begin();
-  RGBLED.setBrightness(0);
-  RGBLED.setPixelColor(0, 0, 0, 0);
-  RGBLED.setPixelColor(1, 0, 0, 0);
-  RGBLED.show();
+  shineColorLED(0,0,0,0);
   
   pinMode(PIN_IN1_R,OUTPUT); 
   pinMode(PIN_IN2_R,OUTPUT);
@@ -159,7 +156,11 @@ void analyseLine(String line){
 }
 
 void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness){
-   
+  RGBLED.setBrightness(brightness);
+  for (int i = 0; i < NUM_RGBLED; i++){
+    RGBLED.setPixelColor(i, r, g, b);
+  }
+  RGBLED.show();
 }
 
 // 文字列から整数型の変換

@@ -1,15 +1,12 @@
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
 
-#define PIN_IN1_R  5
-#define PIN_IN2_R  6
-//#define PIN_VREF_R 6 // PWM
-#define PIN_IN1_L  9
-#define PIN_IN2_L  10
-//#define PIN_VREF_L 9 // PWM
-#define PIN_RGBLED 16
-#define NUM_RGBLED 2
-
+const int PIN_IN1_R = 5; // 右モータ１のPIN番号
+const int PIN_IN2_R = 6; // 右モータ２のPIN番号
+const int PIN_IN1_L = 9; // 左モータ１のPIN番号
+const int PIN_IN2_L = 10; // 左モータ２のPIN番号
+const int PIN_RGBLED = 16; // カラーLEDのPIN番号
+const int NUM_RGBLED = 2; // カラーLEDの数
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
 const String RGBLED_HANDLE = "001F"; // 左モータのハンドル名
@@ -36,52 +33,51 @@ String readStr; // RN4020から受信した文字列
 
 String recvBuffer; // 受信用のバッファ
 
-int leftMotorPWM; // 左モータのPWM(-100~100)
-int rightMotorPWM; // 右モータのPWM(-100~100)
-
 void setup() {
   // カラーLEDの初期化
   RGBLED.begin();
   shineColorLED(0,0,0,0);
-  
+
+  // PINの設定
   pinMode(PIN_IN1_R,OUTPUT); 
   pinMode(PIN_IN2_R,OUTPUT);
   pinMode(PIN_IN1_L,OUTPUT); 
   pinMode(PIN_IN2_L,OUTPUT); 
 
+  // グローバル変数の初期化
   recvBuffer = "";
-  leftMotorPWM = 0;
-  rightMotorPWM = 0;
-  
+
+  // シリアル通信の初期化
   Serial.begin(57600);
   delay(100);
+  Serial.setTimeout(10);
   
-  /* First Setting */
+  // RN4020の初期設定(必要な時だけ実施)
+  /*
   rn4020.begin(115200);
   delay(500);
   sendRN4020(baudRate.comm, baudRate.len);
   delay(100);
   sendRN4020(reboot.comm, reboot.len);
   delay(2000);
-  /* First Setting */
-  
+  */
+
+  // RN4020の初期化
   rn4020.begin(9600);
   delay(100);
+
+  // キャラクタリスティックの初期化
   sendRN4020("SHW,"+LEFT_MOTOR_HANDLE+",30",11);
   sendRN4020("SHW,"+RIGHT_MOTOR_HANDLE+",30",11);
   sendRN4020("SHW,"+RGBLED_HANDLE+",00000000",17);
   sendRN4020("SHW,"+MOTOR_HANDLE+",0000",13);
-
-  Serial.setTimeout(10);
 }
 
 void loop() {
   // シリアルモニタから文字列入力
   inputStr = "";
-  char inputChar;
   while(Serial.available()){
-    inputChar = Serial.read();
-    inputStr += inputChar;
+    inputStr += Serial.read();
     delay(10);
   }
 
@@ -143,10 +139,10 @@ void analyseLine(String line){
     }
     else if (residual.startsWith(RGBLED_HANDLE)){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
-      unsigned char r = convertStr2Char(residual.substring(0,2));
-      unsigned char g = convertStr2Char(residual.substring(2,4));
-      unsigned char b = convertStr2Char(residual.substring(4,6));
-      unsigned char brgt = convertStr2Char(residual.substring(6,8));
+      unsigned char r = convertStr2UChar(residual.substring(0,2));
+      unsigned char g = convertStr2UChar(residual.substring(2,4));
+      unsigned char b = convertStr2UChar(residual.substring(4,6));
+      unsigned char brgt = convertStr2UChar(residual.substring(6,8));
       Serial.println(r,DEC);
       Serial.println(g,DEC);
       Serial.println(b,DEC);
@@ -187,6 +183,13 @@ char convertStr2Char(String str){
   value = str.charAt(0) * 16 + str.charAt(1);
   value -= 128;
   return (char)value;
+}
+
+// 文字列からunsined char型への変換
+unsigned char convertStr2UChar(String str){
+  int value = 0;
+  value = str.charAt(0) * 16 + str.charAt(1);
+  return (unsigned char)value;
 }
 
 // モータの回転

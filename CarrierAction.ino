@@ -174,6 +174,8 @@ void analyseLine(String line){
   else if (line.startsWith("Connection End")){
     isConnected = false;
     isShined = false;
+    rotateMotor(0, Right);
+    rotateMotor(0, Left);    
   }
 }
 

@@ -33,6 +33,7 @@ String readStr; // RN4020から受信した文字列
 
 String recvBuffer; // 受信用のバッファ
 bool isConnected;
+bool isShined;
 
 void setup() {
   // カラーLEDの初期化
@@ -48,6 +49,7 @@ void setup() {
   // グローバル変数の初期化
   recvBuffer = "";
   isConnected = false;
+  isShined = false;
 
   // シリアル通信の初期化
   Serial.begin(57600);
@@ -100,8 +102,13 @@ void loop() {
   analyseBuffer();
 
   // 接続状態の確認
-  if (!isConnected){
-    shineColorLED(255,0,0,255);
+  if (!isShined){
+    if (isConnected){
+      shineColorLED(0,0,0,0);
+    }
+    else {
+      shineColorLED(255,0,0,255);
+    }
   }
 }
 
@@ -162,10 +169,11 @@ void analyseLine(String line){
   }
   else if (line.startsWith("Connected")){
     isConnected = true;
-    shineColorLED(0,0,0,0);
+    isShined = false;
   }
   else if (line.startsWith("Connection End")){
     isConnected = false;
+    isShined = false;
   }
 }
 
@@ -176,6 +184,7 @@ void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned c
     RGBLED.setPixelColor(i, r, g, b);
   }
   RGBLED.show();
+  isShined = true;
 }
 
 // 文字列から整数型の変換

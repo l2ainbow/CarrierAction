@@ -1,3 +1,4 @@
+#include <MsTimer2.h>
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
 
@@ -137,13 +138,13 @@ void analyseLine(String line){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
       int value = convertStr2Int(residual);
       Serial.println(value);
-      rotateMotor(value, Left);
+      rotateLeftMotor(value);
     }
     else if (residual.startsWith(RIGHT_MOTOR_HANDLE)){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
       int value = convertStr2Int(residual);
       Serial.println(value);
-      rotateMotor(value, Right);
+      rotateRightMotor(value);
     }
     else if (residual.startsWith(MOTOR_HANDLE)){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
@@ -151,8 +152,8 @@ void analyseLine(String line){
       char right = convertStr2Char(residual.substring(2,4));
       Serial.println(left,DEC);
       Serial.println(right,DEC);
-      rotateMotor((int)left,Left);
-      rotateMotor((int)right,Right);
+      rotateLeftMotor((int)left);
+      rotateRightMotor((int)right);
     }
     else if (residual.startsWith(RGBLED_HANDLE)){
       residual = residual.substring(residual.indexOf(',') + 1, residual.length() - 1);
@@ -174,8 +175,8 @@ void analyseLine(String line){
   else if (line.startsWith("Connection End")){
     isConnected = false;
     isShined = false;
-    rotateMotor(0, Right);
-    rotateMotor(0, Left);    
+    rotateRightMotor(0);
+    rotateLeftMotor(0);
   }
 }
 
@@ -221,8 +222,7 @@ unsigned char convertStr2UChar(String str){
   return (unsigned char)value;
 }
 
-// モータの回転
-void rotateMotor(int pwm, Motor m){
+void rotateRightMotor(int pwm){
   boolean isAhead = (pwm > 0);
   boolean isBreak = (pwm == 0);
   
@@ -233,36 +233,46 @@ void rotateMotor(int pwm, Motor m){
   Serial.print(isAhead);
   Serial.print(",");
   Serial.print(isBreak);
-  Serial.print(",");
-  Serial.println(m);
-
-  if (m == Right){
-    if (isBreak){
-      digitalWrite(PIN_IN1_R, HIGH);
-      digitalWrite(PIN_IN2_R, HIGH);      
-    }
-    else if (isAhead){
-      analogWrite(PIN_IN1_R, 0);
-      analogWrite(PIN_IN2_R, val);
-    }
-    else{
-      analogWrite(PIN_IN1_R, val);
-      analogWrite(PIN_IN2_R, 0);
-    }
+  Serial.print(",R");
+  
+  if (isBreak){
+    digitalWrite(PIN_IN1_R, HIGH);
+    digitalWrite(PIN_IN2_R, HIGH);      
+  }
+  else if (isAhead){
+    analogWrite(PIN_IN1_R, 0);
+    analogWrite(PIN_IN2_R, val);
   }
   else{
-    if (isBreak){
-      digitalWrite(PIN_IN1_L, HIGH);
-      digitalWrite(PIN_IN2_L, HIGH);      
-    }
-    else if (isAhead){
-      analogWrite(PIN_IN1_L, 0);
-      analogWrite(PIN_IN2_L, val);
-    }
-    else{
-      analogWrite(PIN_IN1_L, val);
-      analogWrite(PIN_IN2_L, 0);
-    }
+    analogWrite(PIN_IN1_R, val);
+    analogWrite(PIN_IN2_R, 0);
+  }
+}
+
+void rotateLeftMotor(int pwm){
+  boolean isAhead = (pwm > 0);
+  boolean isBreak = (pwm == 0);
+  
+  int val = (int)(abs(pwm)/100.0*255);
+  
+  Serial.print(val);
+  Serial.print(",");
+  Serial.print(isAhead);
+  Serial.print(",");
+  Serial.print(isBreak);
+  Serial.print(",L");
+  
+  if (isBreak){
+    digitalWrite(PIN_IN1_L, HIGH);
+    digitalWrite(PIN_IN2_L, HIGH);      
+  }
+  else if (isAhead){
+    analogWrite(PIN_IN1_L, 0);
+    analogWrite(PIN_IN2_L, val);
+  }
+  else{
+    analogWrite(PIN_IN1_L, val);
+    analogWrite(PIN_IN2_L, 0);
   }
 }
 

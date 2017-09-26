@@ -9,6 +9,9 @@ const int PIN_IN2_L = 10; // 左モータ２のPIN番号
 const int PIN_RGBLED = 16; // カラーLEDのPIN番号
 const int NUM_RGBLED = 2; // カラーLEDの数
 const int BOOST_TIME = 50; // モータのブースト時間（停止〜加速）[ms]
+const int R_COLOR = 0;
+const int G_COLOR = 255;
+const int B_COLOR = 0;
 const String LEFT_MOTOR_HANDLE = "0018"; // 左モータのハンドル名
 const String RIGHT_MOTOR_HANDLE = "001B"; // 右モータのハンドル名
 const String RGBLED_HANDLE = "001E"; // 左モータのハンドル名
@@ -104,7 +107,7 @@ void loop() {
   // 接続状態の確認
   if (!isShined){
     if (isConnected){
-      shineColorLED(0,0,0,0);
+      shineColorLED(R_COLOR,G_COLOR,B_COLOR,255);
     }
     else {
       shineColorLED(255,0,0,255);
@@ -159,7 +162,8 @@ void analyseLine(String line){
       unsigned char r = convertStr2UChar(residual.substring(0,2));
       unsigned char g = convertStr2UChar(residual.substring(2,4));
       unsigned char b = convertStr2UChar(residual.substring(4,6));
-      unsigned char brgt = convertStr2UChar(residual.substring(6,8));
+      //unsigned char brgt = convertStr2UChar(residual.substring(6,8));
+      unsigned char brgt = 255;
       Serial.println(r,DEC);
       Serial.println(g,DEC);
       Serial.println(b,DEC);

@@ -81,6 +81,22 @@ void setup() {
 }
 
 void loop() {
+  shineColorLED(255, 0, 0, 255);
+  delay(300);
+  shineColorLED(255, 165, 0, 255);
+  delay(300);
+  shineColorLED(255, 255, 0, 255);
+  delay(300);
+  shineColorLED(0, 128, 0, 255);
+  delay(300);
+  shineColorLED(0, 255, 255, 255);
+  delay(300);
+  shineColorLED(0, 0, 255, 255);
+  delay(300);
+  shineColorLED(128, 0, 128, 255);
+  delay(300);
+  
+  /*
   // シリアルモニタから文字列入力
   inputStr = "";
   char inputChar;
@@ -104,6 +120,7 @@ void loop() {
   // 受信データの解析
   analyseBuffer();
 
+  
   // 接続状態の確認
   if (!isShined){
     if (isConnected){
@@ -113,6 +130,7 @@ void loop() {
       shineColorLED(255,0,0,255);
     }
   }
+  */
 }
 
 // 受信データの解析

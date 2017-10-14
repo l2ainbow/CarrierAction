@@ -16,6 +16,7 @@ MotorDriver::MotorDriver(int pin1, int pin2)
   pin2(pin2),
   pwm(0)
 {
+  hasBoosted = false;
   pinMode(pin1, OUTPUT);
   pinMode(pin2, OUTPUT);
 }
@@ -31,17 +32,10 @@ void MotorDriver::rotate(int pwm) {
 
   int val = (int)(abs(pwm) / 100.0 * 255);
 
-  //Serial.print(val);
-  //Serial.print(",");
-  //Serial.print(isAhead);
-  //Serial.print(",");
-  //Serial.print(isBreak);
-  //Serial.print(",R");
-
   if (lastPWM == 0 && pwm != 0) {
     val = 255;
-    //MsTimer2::set(BOOST_TIME, rotateAgain);
-    //MsTimer2::start();
+    MsTimer2::set(BOOST_TIME, stopBoosting);
+    MsTimer2::start();
   }
   if (isBreak) {
     digitalWrite(pin1, HIGH);
@@ -55,6 +49,15 @@ void MotorDriver::rotate(int pwm) {
     analogWrite(pin1, val);
     analogWrite(pin2, 0);
   }
+}
+
+void MotorDriver::stopBoosting(){
+  hasBoosted = true;
+  MsTimer2::stop();
+}
+
+int MotorDriver::getPWM(){
+  return pwm;
 }
 
 // 右モータの再回転

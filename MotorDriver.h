@@ -10,7 +10,10 @@ class MotorDriver
   public:
     MotorDriver(int pin1, int pin2);
     void rotate(int pwm);
+    static bool hasBoosted;
+    int getPWM();
   private:
+    static void stopBoosting();
     void rotateAgain();
     int pin1;
     int pin2;

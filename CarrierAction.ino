@@ -1,7 +1,7 @@
 #include <MsTimer2.h>
-#include <SoftwareSerial.h>
 #include "ColorLED.h"
 #include "MotorDriver.h"
+#include "RN4020.h"
 
 /*** 構造体 ***/
 // RN4020用コマンドテーブル
@@ -13,6 +13,12 @@ struct commandTable {
 };
 
 /*** 定数 ***/
+// RN4020のRXのPIN番号
+const int PIN_RX_RN4020 = 3;
+// RN4020のTXのPIN番号
+const int PIN_TX_RN4020 = 2;
+// RN4020のボーレート
+const int BAUD_RATE = 9600;
 // 右モータ１のPIN番号
 const int PIN_IN1_R = 5;
 // 右モータ２のPIN番号
@@ -39,14 +45,12 @@ const String RIGHT_MOTOR_HANDLE = "001B";
 const String RGBLED_HANDLE = "001E";
 // モータのハンドル名
 const String MOTOR_HANDLE = "0021";
-// リブート用のコマンド
-const commandTable REBOOT = {"R,1", 3};
-// ボーレート変更のためのコマンド
-const commandTable BAUDRATE = {"SB,1", 4};
+
 
 /*** グローバル変数 ***/
 // RN4020のインスタンス
-SoftwareSerial rn4020(2, 3);
+//SoftwareSerial rn4020(PIN_TX_RN4020, PIN_RX_RN4020);
+RN4020 rn4020(PIN_RX_RN4020, PIN_TX_RN4020, BAUD_RATE);
 // カラーLEDのインスタンス
 ColorLED colorLED = ColorLED(PIN_RGBLED, NUM_RGBLED);
 // 右モータドライバのインスタンス
@@ -56,11 +60,7 @@ MotorDriver leftMotorDriver = MotorDriver(PIN_IN1_L, PIN_IN2_L);
 
 // シリアルモニタからの入力文字列
 String inputStr;
-// RN4020から受信した文字列
-String readStr;
 
-// BLE受信用のバッファ
-String recvBuffer;
 // BLEで接続しているか
 bool isConnected;
 
@@ -74,7 +74,6 @@ volatile int leftPWM;
 // Arduino起動時の処理
 void setup() {
   // グローバル変数の初期化
-  recvBuffer = "";
   isConnected = false;
 
   // シリアル通信の初期化
@@ -85,22 +84,19 @@ void setup() {
   // RN4020の初期設定(必要な時だけ実施)
   /*
     rn4020.begin(115200);
-    delay(500);
-    sendRN4020(BAUDRATE.comm);
+    rn4020.changeBaudRate(BAUD_RATE);
     delay(100);
-    sendRN4020(REBOOT.comm);
-    delay(2000);
+    rn4020.reboot();
   */
 
   // RN4020の初期化
-  rn4020.begin(9600);
-  delay(100);
+  rn4020.begin();
 
   // キャラクタリスティックの初期化
-  sendRN4020("SHW," + LEFT_MOTOR_HANDLE + ",30");
-  sendRN4020("SHW," + RIGHT_MOTOR_HANDLE + ",30");
-  sendRN4020("SHW," + RGBLED_HANDLE + ",00000000");
-  sendRN4020("SHW," + MOTOR_HANDLE + ",0000");
+  rn4020.send("SHW," + LEFT_MOTOR_HANDLE + ",30");
+  rn4020.send("SHW," + RIGHT_MOTOR_HANDLE + ",30");
+  rn4020.send("SHW," + RGBLED_HANDLE + ",00000000");
+  rn4020.send("SHW," + MOTOR_HANDLE + ",0000");
 
   // カラーLEDを未接続状態の色に変更
   colorLED.shine(DISCONNECTED_RGB[0], DISCONNECTED_RGB[1], DISCONNECTED_RGB[2], 255);
@@ -121,31 +117,29 @@ void loop() {
   if (inputStr.compareTo("") != 0) {
     Serial.print(inputStr);
     inputStr.replace("\r\n", "");
-    sendRN4020(inputStr);
+    rn4020.send(inputStr);
   }
 
   // 受信データの読込
-  while (rn4020.available()) {
-    recvBuffer += (char)rn4020.read();
-  }
+  String recvStr = rn4020.receive();
 
   // 受信データの解析
-  analyseBuffer();
+  analyseBuffer(recvStr);
 }
 
 // 受信データの解析
-void analyseBuffer() {
+void analyseBuffer(String str) {
+  String buf = str;
   int eol = -1;
   String line = "";
-  while ((eol = recvBuffer.indexOf("\r\n")) >= 0) {
-    line = recvBuffer.substring(0, eol);
+  while ((eol = buf.indexOf("\r\n")) >= 0) {
+    line = buf.substring(0, eol);
     analyseLine(line);
 
-    if (eol == recvBuffer.length()) {
-      recvBuffer = "";
+    if (eol == buf.length()) {
       break;
     }
-    recvBuffer = recvBuffer.substring(eol + 2);
+    buf = buf.substring(eol + 2);
   }
 }
 
@@ -282,15 +276,5 @@ void rotateLeftMotor(int pwm) {
 void rotateLeftMotorAgain() {
   MsTimer2::stop();
   leftMotorDriver.rotate(leftPWM);
-}
-
-// RN4020への文字列送信
-// str: 送信したい文字列
-void sendRN4020(String str) {
-  for (int i = 0; i < str.length(); i++) {
-    rn4020.write(str.charAt(i));
-    delay(20);
-  }
-  rn4020.write('\n');
 }
 

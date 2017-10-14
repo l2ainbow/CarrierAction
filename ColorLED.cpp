@@ -16,6 +16,7 @@ ColorLED::ColorLED(int pin, int num)
   number(num)
 {
   led.begin();
+  switchOff();
 }
 
 // カラーLEDを光らせる
@@ -31,6 +32,7 @@ void ColorLED::shine(unsigned char r, unsigned char g, unsigned char b, unsigned
   led.show();
 }
 
+// カラーLEDを消灯する
 void ColorLED::switchOff() {
   this->shine(0, 0, 0, 0);
 }

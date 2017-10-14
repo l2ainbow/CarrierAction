@@ -37,7 +37,9 @@ const int NUM_RGBLED = 2;
 // モータのブースト時間（停止〜加速）[ms]
 const int BOOST_TIME = 50;
 // 接続時の色
-const color CONNECTED_COLOR = {0, 255, 0};
+const int CONNECTED_RGB[] = {0, 255, 0};
+// 未接続時の色
+const int DISCONNECTED_RGB[] = {255, 0, 0};
 // 左モータのハンドル名
 const String LEFT_MOTOR_HANDLE = "0018";
 // 右モータのハンドル名
@@ -66,8 +68,6 @@ String readStr;
 String recvBuffer;
 // BLEで接続しているか
 bool isConnected;
-// カラーLEDが光っているか(true: 光っている/false: 光っていない)
-bool isShined;
 
 // 右モータのPWM
 volatile int rightPWM;
@@ -78,9 +78,6 @@ volatile int leftPWM;
 
 // Arduino起動時の処理
 void setup() {
-  // カラーLEDの初期化
-  colorLED.switchOff();
-
   // PINの設定
   pinMode(PIN_IN1_R, OUTPUT);
   pinMode(PIN_IN2_R, OUTPUT);
@@ -90,7 +87,6 @@ void setup() {
   // グローバル変数の初期化
   recvBuffer = "";
   isConnected = false;
-  isShined = false;
 
   // シリアル通信の初期化
   Serial.begin(57600);
@@ -116,6 +112,9 @@ void setup() {
   sendRN4020("SHW," + RIGHT_MOTOR_HANDLE + ",30", 11);
   sendRN4020("SHW," + RGBLED_HANDLE + ",00000000", 17);
   sendRN4020("SHW," + MOTOR_HANDLE + ",0000", 13);
+
+  // カラーLEDを未接続状態の色に変更
+  colorLED.shine(DISCONNECTED_RGB[0], DISCONNECTED_RGB[1], DISCONNECTED_RGB[2], 255);
 }
 
 // Arduinoのループ処理
@@ -142,16 +141,6 @@ void loop() {
 
   // 受信データの解析
   analyseBuffer();
-
-  // 接続状態の確認
-  if (!isShined) {
-    if (isConnected) {
-      shineColorLED(CONNECTED_COLOR, 255);
-    }
-    else {
-      shineColorLED(255, 0, 0, 255);
-    }
-  }
 }
 
 // 受信データの解析
@@ -208,33 +197,19 @@ void analyseLine(String line) {
       Serial.println(g, DEC);
       Serial.println(b, DEC);
       Serial.println(brgt, DEC);
-      shineColorLED(r, g, b, brgt);
+      colorLED.shine(r, g, b, brgt);
     }
   }
   else if (line.startsWith("Connected")) {
     isConnected = true;
-    isShined = false;
+    colorLED.shine(CONNECTED_RGB[0], CONNECTED_RGB[1], CONNECTED_RGB[2], 255);
   }
   else if (line.startsWith("Connection End")) {
     isConnected = false;
-    isShined = false;
     rotateRightMotor(0);
     rotateLeftMotor(0);
+    colorLED.shine(DISCONNECTED_RGB[0], DISCONNECTED_RGB[1], DISCONNECTED_RGB[2], 255);
   }
-}
-
-// カラーLEDを光らせる
-// r: RGBのR(0-255)
-// g: RGBのG(0-255)
-// b: RGBのB(0-255)
-// brightness: 光の強さ(0-255)
-void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness) {
-  colorLED.shine(r,g,b,brightness);
-  isShined = true;
-}
-
-void shineColorLED(color col, unsigned char brightness) {
-  shineColorLED(col.r, col.g, col.b, brightness);
 }
 
 // 文字列からint型の変換

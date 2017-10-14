@@ -3,15 +3,6 @@
 #include "MotorDriver.h"
 #include "RN4020.h"
 
-/*** 構造体 ***/
-// RN4020用コマンドテーブル
-// comm: コマンド
-// len: コマンドの文字長
-struct commandTable {
-  char comm[50];
-  int len;
-};
-
 /*** 定数 ***/
 // RN4020のRXのPIN番号
 const int PIN_RX_RN4020 = 3;
@@ -46,10 +37,8 @@ const String RGBLED_HANDLE = "001E";
 // モータのハンドル名
 const String MOTOR_HANDLE = "0021";
 
-
 /*** グローバル変数 ***/
 // RN4020のインスタンス
-//SoftwareSerial rn4020(PIN_TX_RN4020, PIN_RX_RN4020);
 RN4020 rn4020(PIN_RX_RN4020, PIN_TX_RN4020, BAUD_RATE);
 // カラーLEDのインスタンス
 ColorLED colorLED = ColorLED(PIN_RGBLED, NUM_RGBLED);
@@ -57,9 +46,6 @@ ColorLED colorLED = ColorLED(PIN_RGBLED, NUM_RGBLED);
 MotorDriver rightMotorDriver = MotorDriver(PIN_IN1_R, PIN_IN2_R);
 // 左モータドライバのインスタンス
 MotorDriver leftMotorDriver = MotorDriver(PIN_IN1_L, PIN_IN2_L);
-
-// シリアルモニタからの入力文字列
-String inputStr;
 
 // BLEで接続しているか
 bool isConnected;
@@ -105,7 +91,7 @@ void setup() {
 // Arduinoのループ処理
 void loop() {
   // シリアルモニタから文字列入力
-  inputStr = "";
+  String inputStr = "";
   char inputChar;
   while (Serial.available()) {
     inputChar = Serial.read();

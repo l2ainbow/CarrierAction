@@ -86,9 +86,9 @@ void setup() {
   /*
     rn4020.begin(115200);
     delay(500);
-    sendRN4020(BAUDRATE.comm, BAUDRATE.len);
+    sendRN4020(BAUDRATE.comm);
     delay(100);
-    sendRN4020(REBOOT.comm, REBOOT.len);
+    sendRN4020(REBOOT.comm);
     delay(2000);
   */
 
@@ -97,10 +97,10 @@ void setup() {
   delay(100);
 
   // キャラクタリスティックの初期化
-  sendRN4020("SHW," + LEFT_MOTOR_HANDLE + ",30", 11);
-  sendRN4020("SHW," + RIGHT_MOTOR_HANDLE + ",30", 11);
-  sendRN4020("SHW," + RGBLED_HANDLE + ",00000000", 17);
-  sendRN4020("SHW," + MOTOR_HANDLE + ",0000", 13);
+  sendRN4020("SHW," + LEFT_MOTOR_HANDLE + ",30");
+  sendRN4020("SHW," + RIGHT_MOTOR_HANDLE + ",30");
+  sendRN4020("SHW," + RGBLED_HANDLE + ",00000000");
+  sendRN4020("SHW," + MOTOR_HANDLE + ",0000");
 
   // カラーLEDを未接続状態の色に変更
   colorLED.shine(DISCONNECTED_RGB[0], DISCONNECTED_RGB[1], DISCONNECTED_RGB[2], 255);
@@ -120,7 +120,8 @@ void loop() {
   // 文字列の送信
   if (inputStr.compareTo("") != 0) {
     Serial.print(inputStr);
-    sendRN4020(inputStr, inputStr.length() - 2);
+    inputStr.replace("\r\n", "");
+    sendRN4020(inputStr);
   }
 
   // 受信データの読込
@@ -285,9 +286,8 @@ void rotateLeftMotorAgain() {
 
 // RN4020への文字列送信
 // str: 送信したい文字列
-// num: 送信したい文字数
-void sendRN4020(String str, int num) {
-  for (int i = 0; i < num; i++) {
+void sendRN4020(String str) {
+  for (int i = 0; i < str.length(); i++) {
     rn4020.write(str.charAt(i));
     delay(20);
   }

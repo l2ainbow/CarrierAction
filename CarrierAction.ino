@@ -1,18 +1,9 @@
 #include <MsTimer2.h>
 #include <SoftwareSerial.h>
 #include "ColorLED.h"
+#include "MotorDriver.h"
 
 /*** 構造体 ***/
-// 色(光の3原色)
-// r: RGBのR
-// g: RGBのG
-// b: RGBのB
-struct color {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-};
-
 // RN4020用コマンドテーブル
 // comm: コマンド
 // len: コマンドの文字長
@@ -58,6 +49,10 @@ const commandTable BAUDRATE = {"SB,1", 4};
 SoftwareSerial rn4020(2, 3);
 // カラーLEDのインスタンス
 ColorLED colorLED = ColorLED(PIN_RGBLED, NUM_RGBLED);
+// 右モータドライバのインスタンス
+MotorDriver rightMotorDriver = MotorDriver(PIN_IN1_R, PIN_IN2_R);
+// 左モータドライバのインスタンス
+MotorDriver leftMotorDriver = MotorDriver(PIN_IN1_L, PIN_IN2_L);
 
 // シリアルモニタからの入力文字列
 String inputStr;
@@ -78,12 +73,6 @@ volatile int leftPWM;
 
 // Arduino起動時の処理
 void setup() {
-  // PINの設定
-  pinMode(PIN_IN1_R, OUTPUT);
-  pinMode(PIN_IN2_R, OUTPUT);
-  pinMode(PIN_IN1_L, OUTPUT);
-  pinMode(PIN_IN2_L, OUTPUT);
-
   // グローバル変数の初期化
   recvBuffer = "";
   isConnected = false;
@@ -256,54 +245,20 @@ void rotateRightMotor(int pwm) {
   int lastPWM = rightPWM;
   rightPWM = pwm;
 
-  boolean isAhead = (pwm > 0);
-  boolean isBreak = (pwm == 0);
-
-  int val = (int)(abs(pwm) / 100.0 * 255);
-
-  Serial.print(val);
-  Serial.print(",");
-  Serial.print(isAhead);
-  Serial.print(",");
-  Serial.print(isBreak);
-  Serial.print(",R");
-
   if (lastPWM == 0 && pwm != 0) {
-    val = 255;
     MsTimer2::set(BOOST_TIME, rotateRightMotorAgain);
     MsTimer2::start();
+    rightMotorDriver.rotate(100);
   }
-  if (isBreak) {
-    digitalWrite(PIN_IN1_R, HIGH);
-    digitalWrite(PIN_IN2_R, HIGH);
-  }
-  else if (isAhead) {
-    analogWrite(PIN_IN1_R, 0);
-    analogWrite(PIN_IN2_R, val);
-  }
-  else {
-    analogWrite(PIN_IN1_R, val);
-    analogWrite(PIN_IN2_R, 0);
+  else{
+    rightMotorDriver.rotate(pwm);
   }
 }
 
 // 右モータの再回転
 void rotateRightMotorAgain() {
   MsTimer2::stop();
-  int val = (int)(abs(rightPWM) / 100.0 * 255);
-
-  if (rightPWM == 0) {
-    digitalWrite(PIN_IN1_R, HIGH);
-    digitalWrite(PIN_IN2_R, HIGH);
-  }
-  else if (rightPWM > 0) {
-    analogWrite(PIN_IN1_R, 0);
-    analogWrite(PIN_IN2_R, val);
-  }
-  else {
-    analogWrite(PIN_IN1_R, val);
-    analogWrite(PIN_IN2_R, 0);
-  }
+  rightMotorDriver.rotate(rightPWM);
 }
 
 // 左モータの回転
@@ -311,55 +266,21 @@ void rotateRightMotorAgain() {
 void rotateLeftMotor(int pwm) {
   int lastPWM = leftPWM;
   leftPWM = pwm;
-
-  boolean isAhead = (pwm > 0);
-  boolean isBreak = (pwm == 0);
-
-  int val = (int)(abs(pwm) / 100.0 * 255);
-
-  Serial.print(val);
-  Serial.print(",");
-  Serial.print(isAhead);
-  Serial.print(",");
-  Serial.print(isBreak);
-  Serial.print(",L");
-
+  
   if (lastPWM == 0 && pwm != 0) {
-    val = 255;
     MsTimer2::set(BOOST_TIME, rotateLeftMotorAgain);
     MsTimer2::start();
-  }
-  if (isBreak) {
-    digitalWrite(PIN_IN1_L, HIGH);
-    digitalWrite(PIN_IN2_L, HIGH);
-  }
-  else if (isAhead) {
-    analogWrite(PIN_IN1_L, 0);
-    analogWrite(PIN_IN2_L, val);
+    leftMotorDriver.rotate(100);
   }
   else {
-    analogWrite(PIN_IN1_L, val);
-    analogWrite(PIN_IN2_L, 0);
+    leftMotorDriver.rotate(pwm);
   }
 }
 
 // 左モータの再回転
 void rotateLeftMotorAgain() {
   MsTimer2::stop();
-  int val = (int)(abs(leftPWM) / 100.0 * 255);
-
-  if (leftPWM == 0) {
-    digitalWrite(PIN_IN1_L, HIGH);
-    digitalWrite(PIN_IN2_L, HIGH);
-  }
-  else if (leftPWM > 0) {
-    analogWrite(PIN_IN1_L, 0);
-    analogWrite(PIN_IN2_L, val);
-  }
-  else {
-    analogWrite(PIN_IN1_L, val);
-    analogWrite(PIN_IN2_L, 0);
-  }
+  leftMotorDriver.rotate(leftPWM);
 }
 
 // RN4020への文字列送信

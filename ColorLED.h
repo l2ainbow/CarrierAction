@@ -9,6 +9,7 @@ class ColorLED
   public:
     ColorLED(int pin, int num);
     void shine(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness);
+    void switchOff();
   private:
     Adafruit_NeoPixel led;
     int number;

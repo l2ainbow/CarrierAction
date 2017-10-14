@@ -11,7 +11,7 @@
 // pin: カラーLEDと接続しているArduinoのPIN番号
 // num: 接続しているカラーLEDの数
 ColorLED::ColorLED(int pin, int num)
-:
+  :
   led(Adafruit_NeoPixel(num, pin, NEO_RGB + NEO_KHZ800)),
   number(num)
 {
@@ -29,5 +29,9 @@ void ColorLED::shine(unsigned char r, unsigned char g, unsigned char b, unsigned
     led.setPixelColor(i, r, g, b);
   }
   led.show();
+}
+
+void ColorLED::switchOff() {
+  this->shine(0, 0, 0, 0);
 }
 

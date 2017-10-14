@@ -1,6 +1,6 @@
 #include <MsTimer2.h>
 #include <SoftwareSerial.h>
-#include <Adafruit_NeoPixel.h>
+#include "ColorLED.h"
 
 /*** 構造体 ***/
 // 色(光の3原色)
@@ -55,7 +55,7 @@ const commandTable BAUDRATE = {"SB,1", 4};
 // RN4020のインスタンス
 SoftwareSerial rn4020(2, 3);
 // カラーLEDのインスタンス
-Adafruit_NeoPixel RGBLED = Adafruit_NeoPixel(NUM_RGBLED, PIN_RGBLED, NEO_RGB + NEO_KHZ800);
+ColorLED colorLED = ColorLED(PIN_RGBLED, NUM_RGBLED);
 
 // シリアルモニタからの入力文字列
 String inputStr;
@@ -79,8 +79,7 @@ volatile int leftPWM;
 // Arduino起動時の処理
 void setup() {
   // カラーLEDの初期化
-  RGBLED.begin();
-  shineColorLED(0, 0, 0, 0);
+  colorLED.switchOff();
 
   // PINの設定
   pinMode(PIN_IN1_R, OUTPUT);
@@ -230,11 +229,7 @@ void analyseLine(String line) {
 // b: RGBのB(0-255)
 // brightness: 光の強さ(0-255)
 void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness) {
-  RGBLED.setBrightness(brightness);
-  for (int i = 0; i < NUM_RGBLED; i++) {
-    RGBLED.setPixelColor(i, r, g, b);
-  }
-  RGBLED.show();
+  colorLED.shine(r,g,b,brightness);
   isShined = true;
 }
 

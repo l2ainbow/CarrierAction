@@ -20,24 +20,35 @@ const String MOTOR_HANDLE = "0021"; // モータのハンドル名
 SoftwareSerial rn4020(2, 3);
 Adafruit_NeoPixel RGBLED = Adafruit_NeoPixel(NUM_RGBLED, PIN_RGBLED, NEO_RGB + NEO_KHZ800);
 
+// RN4020用コマンドテーブル
 struct commandTable {
   char comm[50];
   int len;
 };
 
+// リブート用のコマンド
 struct commandTable reboot = {"R,1",3};
-struct commandTable baudRate = {"SB,1",4}; //baud rate 9600
+// ボーレート変更のためのコマンド
+struct commandTable baudRate = {"SB,1",4};
 
-String inputStr; // シリアルモニタからの入力文字列
-String readStr; // RN4020から受信した文字列
+// シリアルモニタからの入力文字列
+String inputStr;
+// RN4020から受信した文字列
+String readStr;
 
-String recvBuffer; // 受信用のバッファ
+// BLE受信用のバッファ
+String recvBuffer;
+// BLEで接続しているか
 bool isConnected;
+// カラーLEDが光っているか(true: 光っている/false: 光っていない)
 bool isShined;
 
+// 右モータのPWM
 volatile int rightPWM;
+// 左モータのPWM
 volatile int leftPWM;
 
+// Arduino起動時の処理
 void setup() {
   // カラーLEDの初期化
   RGBLED.begin();
@@ -80,6 +91,7 @@ void setup() {
   sendRN4020("SHW,"+MOTOR_HANDLE+",0000",13);
 }
 
+// Arduinoのループ処理
 void loop() {
   // シリアルモニタから文字列入力
   inputStr = "";
@@ -132,6 +144,7 @@ void analyseBuffer(){
 }
 
 // 1行単位での解析
+// line: 1行分の文字列
 void analyseLine(String line){
   Serial.println(line);
   if(line.startsWith("WV,")){
@@ -184,6 +197,10 @@ void analyseLine(String line){
 }
 
 // カラーLEDを光らせる
+// r: RGBのR(0-255)
+// g: RGBのG(0-255)
+// b: RGBのB(0-255)
+// brightness: 光の強さ(0-255)
 void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned char brightness){
   RGBLED.setBrightness(brightness);
   for (int i = 0; i < NUM_RGBLED; i++){
@@ -193,7 +210,9 @@ void shineColorLED(unsigned char r, unsigned char g, unsigned char b, unsigned c
   isShined = true;
 }
 
-// 文字列から整数型の変換
+// 文字列からint型の変換
+// str: 変換したい文字列
+// -> 変換後の数値(int型)
 int convertStr2Int(String str){
   int value = 0;
   int sign = 1;
@@ -211,6 +230,8 @@ int convertStr2Int(String str){
 }
 
 // 文字列からChar型への変換
+// str: 変換したい文字列
+// -> 変換後の数値(char型)
 char convertStr2Char(String str){
   int value = 0;
   value = str.charAt(0) * 16 + str.charAt(1);
@@ -219,6 +240,8 @@ char convertStr2Char(String str){
 }
 
 // 文字列からunsined char型への変換
+// str: 変換したい文字列
+// -> 変換後の数値(unsigned char型)
 unsigned char convertStr2UChar(String str){
   int value = 0;
   value = str.charAt(0) * 16 + str.charAt(1);
@@ -226,6 +249,7 @@ unsigned char convertStr2UChar(String str){
 }
 
 // 右モータの回転
+// pwm: 右モータのPWM
 void rotateRightMotor(int pwm){
   int lastPWM = rightPWM;
   rightPWM = pwm;
@@ -261,6 +285,7 @@ void rotateRightMotor(int pwm){
   }
 }
 
+// 右モータの再回転
 void rotateRightMotorAgain(){
   MsTimer2::stop();
   int val = (int)(abs(rightPWM)/100.0*255);
@@ -280,6 +305,7 @@ void rotateRightMotorAgain(){
 }
 
 // 左モータの回転
+// pwm: 左モータのPWM
 void rotateLeftMotor(int pwm){
   int lastPWM = leftPWM;
   leftPWM = pwm;
@@ -315,6 +341,7 @@ void rotateLeftMotor(int pwm){
   }
 }
 
+// 左モータの再回転
 void rotateLeftMotorAgain(){
   MsTimer2::stop();
   int val = (int)(abs(leftPWM)/100.0*255);
@@ -334,9 +361,11 @@ void rotateLeftMotorAgain(){
 }
 
 // RN4020への文字列送信
-void sendRN4020(String s,int l){
-  for(int i=0;i<l;i++){
-    rn4020.write(s.charAt(i));
+// str: 送信したい文字列
+// num: 送信したい文字数
+void sendRN4020(String str,int num){
+  for(int i=0;i<num;i++){
+    rn4020.write(str.charAt(i));
     delay(20);
   }
   rn4020.write('\n');

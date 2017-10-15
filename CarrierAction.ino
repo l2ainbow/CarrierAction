@@ -47,6 +47,8 @@ MotorDriver rightMotorDriver = MotorDriver(PIN_IN1_R, PIN_IN2_R);
 // 左モータドライバのインスタンス
 MotorDriver leftMotorDriver = MotorDriver(PIN_IN1_L, PIN_IN2_L);
 
+// RN4020より受信した文字列のバッファ
+String recvBuffer;
 // BLEで接続しているか
 bool isConnected;
 
@@ -60,6 +62,7 @@ volatile int leftPWM;
 // Arduino起動時の処理
 void setup() {
   // グローバル変数の初期化
+  recvBuffer = "";
   isConnected = false;
 
   // シリアル通信の初期化
@@ -107,25 +110,25 @@ void loop() {
   }
 
   // 受信データの読込
-  String recvStr = rn4020.receive();
+  recvBuffer += rn4020.receive();
 
   // 受信データの解析
-  analyseBuffer(recvStr);
+  analyseBuffer();
 }
 
 // 受信データの解析
-void analyseBuffer(String str) {
-  String buf = str;
+void analyseBuffer() {
   int eol = -1;
   String line = "";
-  while ((eol = buf.indexOf("\r\n")) >= 0) {
-    line = buf.substring(0, eol);
+  while ((eol = recvBuffer.indexOf("\r\n")) >= 0) {
+    line = recvBuffer.substring(0, eol);
     analyseLine(line);
 
-    if (eol == buf.length()) {
+    if (eol == recvBuffer.length()) {
+      recvBuffer = "";
       break;
     }
-    buf = buf.substring(eol + 2);
+    recvBuffer = recvBuffer.substring(eol + 2);
   }
 }
 

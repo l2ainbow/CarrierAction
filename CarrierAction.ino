@@ -222,8 +222,23 @@ char convertStr2Char(String str) {
 // -> 変換後の数値(unsigned char型)
 unsigned char convertStr2UChar(String str) {
   int value = 0;
-  value = str.charAt(0) * 16 + str.charAt(1);
+  //value = str.charAt(0) * 16 + str.charAt(1);
+  value = convertChar2Int(str.charAt(0)) * 16 + convertChar2Int(str.charAt(1));
   return (unsigned char)value;
+}
+
+// 16進数を表すchar型（0-F）からint型への変換
+// char: 変換したい16進数
+// -> 変換後の数値(int型)
+int convertChar2Int(char c){
+  int value = 0;
+  if (c >= 'A'){
+    value = c - 'A' + 10;
+  }
+  else {
+    value = c - '0';
+  }
+  return value;
 }
 
 // 右モータの回転

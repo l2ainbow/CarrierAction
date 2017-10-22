@@ -16,7 +16,6 @@ ColorLED::ColorLED(int pin, int num)
   number(num)
 {
   led.begin();
-  switchOff();
 }
 
 // カラーLEDを光らせる

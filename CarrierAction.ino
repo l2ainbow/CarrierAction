@@ -61,6 +61,9 @@ volatile int leftPWM;
 
 // Arduino起動時の処理
 void setup() {
+  // カラーLEDを消灯
+  colorLED.switchOff();
+  
   // グローバル変数の初期化
   recvBuffer = "";
   isConnected = false;

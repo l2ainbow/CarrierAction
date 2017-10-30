@@ -21,7 +21,7 @@ const int PIN_IN2_L = 10;
 // カラーLEDのPIN番号
 const int PIN_RGBLED = 16;
 // カラーLEDの数
-const int NUM_RGBLED = 2;
+const int NUM_RGBLED = 4;
 // モータのブースト時間（停止〜加速）[ms]
 const int BOOST_TIME = 50;
 // 接続時の色

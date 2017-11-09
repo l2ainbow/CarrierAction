@@ -167,8 +167,10 @@ void analyseLine(String line) {
       unsigned char r = convertStr2UChar(residual.substring(0, 2));
       unsigned char g = convertStr2UChar(residual.substring(2, 4));
       unsigned char b = convertStr2UChar(residual.substring(4, 6));
-      //unsigned char brgt = convertStr2UChar(residual.substring(6,8));
       unsigned char brgt = 255;
+      if (residual.length() >= 8){
+        brgt = convertStr2UChar(residual.substring(6, 8));
+      }
       Serial.println(r, DEC);
       Serial.println(g, DEC);
       Serial.println(b, DEC);

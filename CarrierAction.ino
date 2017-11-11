@@ -20,6 +20,8 @@ const int PIN_IN1_L = 9;
 const int PIN_IN2_L = 10;
 // カラーLEDのPIN番号
 const int PIN_RGBLED = 16;
+const int PIN_ENCODER_R = 17;
+const int PIN_ENCODER_L = 15; 
 // カラーLEDの数
 const int NUM_RGBLED = 4;
 // モータのブースト時間（停止〜加速）[ms]
@@ -61,6 +63,7 @@ volatile int leftPWM;
 
 // Arduino起動時の処理
 void setup() {
+  
   // カラーLEDを消灯
   colorLED.switchOff();
   
@@ -92,13 +95,21 @@ void setup() {
 
   // カラーLEDを未接続状態の色に変更
   colorLED.shine(DISCONNECTED_RGB[0], DISCONNECTED_RGB[1], DISCONNECTED_RGB[2], 255);
+
+  leftMotorDriver.rotate(50);
 }
+
+int cnt = 0;
 
 // Arduinoのループ処理
 void loop() {
   // シリアルモニタから文字列入力
   String inputStr = "";
   char inputChar;
+  int val = analogRead(PIN_ENCODER_L);
+  cnt++;
+  Serial.println(String(micros())+","+String(val));
+  /*
   while (Serial.available()) {
     inputChar = Serial.read();
     inputStr += inputChar;
@@ -117,6 +128,7 @@ void loop() {
 
   // 受信データの解析
   analyseBuffer();
+  */
 }
 
 // 受信データの解析

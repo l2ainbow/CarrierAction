@@ -19,7 +19,7 @@ class Encoder
     float speed;
     int cnt;
     int valueBuffer[BUFFER_ELEMENT];
-    int timeBuffer[BUFFER_ELEMENT];
+    long timeBuffer[BUFFER_ELEMENT];
     int averageBuffer[BUFFER_ELEMENT];
     int movingAverage(int);
 };

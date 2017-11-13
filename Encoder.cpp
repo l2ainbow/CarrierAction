@@ -22,9 +22,8 @@ void Encoder::encode() {
   timeBuffer[index] = micros();
   averageBuffer[index] = movingAverage(AVERAGING_TIME);
   cnt++;
-  Serial.println(String(millis())+",encode,index,"+String(index)+",valueBuffer,"+String(valueBuffer[index]));
-  Serial.println(String(millis())+",encode,index,"+String(index)+",timeBuffer,"+String(timeBuffer[index]));
-  Serial.println(String(millis())+",encode,index,"+String(index)+",averageBuffer,"+String(averageBuffer[index]));
+  Serial.println(String(millis())+",encode,index,"+String(index)+",valueBuffer,"+String(valueBuffer[index])+",timeBuffer,"+String(timeBuffer[index])
+  +",averageBuffer,"+String(averageBuffer[index]));
 }
 
 // 速度を取得する
@@ -68,11 +67,8 @@ float Encoder::getSpeed() {
   tire = 0.05 * M_PI;
   // 速度計算結果
   speed = (float)resultTime * tire;
-  Serial.println(String(millis())+",getSpeed,index,"+String(index)+",firstTime,"+String(firstTime));
-  Serial.println(String(millis())+",getSpeed,index,"+String(index)+",secondTime,"+String(secondTime));
-  Serial.println(String(millis())+",getSpeed,index,"+String(index)+",resultTime,"+String(resultTime));
-  Serial.println(String(millis())+",getSpeed,index,"+String(index)+",tire,"+String(tire));
-  Serial.println(String(millis())+",getSpeed,index,"+String(index)+",speed,"+String(speed));
+  Serial.println(String(millis())+",getSpeed,index,"+String(index)+",firstTime,"+String(firstTime)+",secondTime,"+String(secondTime)
+  +",resultTime,"+String(resultTime)+",tire,"+String(tire)+",speed,"+String(speed));
   return speed;
 }
 
@@ -86,10 +82,8 @@ int Encoder::movingAverage(int time) {
       break;
     }
     sum += valueBuffer[(cnt - i) % BUFFER_ELEMENT];
-    Serial.println(String(millis())+",movingAverage,i,"+String(i)+",valueBuffer,"+String(valueBuffer[(cnt - i) % BUFFER_ELEMENT])+",sum,"+String(sum));
   }
-  average = sum / (i + 1);
-  Serial.println(String(millis())+",movingAverage,i,"+String(i)+",average,"+String(average));
+  average = sum / i;
   return average;
 }
 

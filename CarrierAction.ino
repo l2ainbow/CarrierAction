@@ -44,6 +44,8 @@ MotorDriver rightMotorDriver = MotorDriver(PIN_IN1_R, PIN_IN2_R);
 MotorDriver leftMotorDriver = MotorDriver(PIN_IN1_L, PIN_IN2_L);
 // 右エンコーダのインスタンス
 Encoder rightEncoder = Encoder(PIN_ENCODER_R);
+// 左エンコーダのインスタンス
+// Encoder leftEncoder = Encoder(PIN_ENCODER_L);
 
 // RN4020より受信した文字列のバッファ
 String recvBuffer;
@@ -64,7 +66,8 @@ void setup() {
   recvBuffer = "";
   isConnected = false;
 
-  rightMotorDriver.rotate(100);
+  rightMotorDriver.rotate(50);
+  // leftMotorDriver.rotate(100);
 
   Serial.begin(57600);
 }
@@ -80,11 +83,13 @@ void loop() {
   cnt++;
   
   rightEncoder.encode();
+  // leftEncoder.encode();
   
   if (cnt % 100 == 0){
-    float speed = rightEncoder.getSpeed();
-    Serial.println(String(millis())+",CarrierAction,speed,"+String(speed));
+    float speedR = rightEncoder.getSpeed();
+    // float speedL = leftEncoder.getSpeed();
+    Serial.println(String(millis())+",CarrierAction,speedR,"+String(speedR));
+    // Serial.println(String(millis())+",CarrierAction,speedL,"+String(speedL));
   }
 }
-
 

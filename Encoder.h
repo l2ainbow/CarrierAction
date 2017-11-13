@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 const int AVERAGING_TIME = 5;
-const int THRESHOLD_CYCLE = 400;
+const int THRESHOLD_CYCLE = 150;
 const int BUFFER_ELEMENT = 100;
 
 class Encoder

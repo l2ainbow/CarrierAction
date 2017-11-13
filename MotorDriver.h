@@ -7,12 +7,14 @@ class MotorDriver
 {
   public:
     MotorDriver(int pin1, int pin2);
-    void rotate(int pwm);
+    void rotate(float pwm);
+    void rotateWithSpeed(float speed);
     int getPWM();
   private:
     int pin1;
     int pin2;
     int pwm;
+    float convertToPWM(float speed);
 };
 
 #endif

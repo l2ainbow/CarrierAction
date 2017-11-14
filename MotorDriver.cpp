@@ -14,16 +14,16 @@ struct ps {
   float speed;
 };
 
-// pwmとspeedの関係（仮置き）
+// pwmとspeedの関係
 struct ps ps[NUM_PS] = {
   {20,0},
-  {30,8},
-  {40,20},
-  {50,32},
-  {60,45},
-  {70,59},
-  {80,71},
-  {90,85},
+  {30,28},
+  {40,39},
+  {50,59},
+  {60,62},
+  {70,74},
+  {80,76},
+  {90,86},
   {100,100}
 };
 
@@ -78,15 +78,21 @@ float MotorDriver::convertToPWM(float speed){
   if (speed == 0){
     return 0;
   }
+  
+  float a_speed = abs(speed);
 
   float pwm = 0;
   for (int i = 1; i < NUM_PS; i++){
-    if ((float)speed <= ps[i].speed){
+    if (a_speed <= ps[i].speed){
       float a = (ps[i].pwm - ps[i-1].pwm) / (ps[i].speed - ps[i-1].speed);
       float b = ps[i].pwm - a * ps[i].speed;
-      pwm = a * speed + b;
+      pwm = a * a_speed + b;
       break;
     }
+  }
+  
+  if (speed < 0){
+    pwm = -pwm;
   }
   
   return pwm;

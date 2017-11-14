@@ -252,17 +252,17 @@ void rotateRightMotor(int pwm) {
   if (lastPWM == 0 && pwm != 0) {
     MsTimer2::set(BOOST_TIME, rotateRightMotorAgain);
     MsTimer2::start();
-    rightMotorDriver.rotate(100);
+    rightMotorDriver.rotateWithSpeed(100);
   }
   else{
-    rightMotorDriver.rotate(pwm);
+    rightMotorDriver.rotateWithSpeed(pwm);
   }
 }
 
 // 右モータの再回転
 void rotateRightMotorAgain() {
   MsTimer2::stop();
-  rightMotorDriver.rotate(rightPWM);
+  rightMotorDriver.rotateWithSpeed(rightPWM);
 }
 
 // 左モータの回転
@@ -274,16 +274,16 @@ void rotateLeftMotor(int pwm) {
   if (lastPWM == 0 && pwm != 0) {
     MsTimer2::set(BOOST_TIME, rotateLeftMotorAgain);
     MsTimer2::start();
-    leftMotorDriver.rotate(100);
+    leftMotorDriver.rotateWithSpeed(100);
   }
   else {
-    leftMotorDriver.rotate(pwm);
+    leftMotorDriver.rotateWithSpeed(pwm);
   }
 }
 
 // 左モータの再回転
 void rotateLeftMotorAgain() {
   MsTimer2::stop();
-  leftMotorDriver.rotate(leftPWM);
+  leftMotorDriver.rotateWithSpeed(leftPWM);
 }
 
